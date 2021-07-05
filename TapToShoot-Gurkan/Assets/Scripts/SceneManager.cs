@@ -4,43 +4,62 @@ using UnityEngine;
 
 public class SceneManager : MonoBehaviour
 {
+    [Space]
+    [Header("Block")]
     public GameObject blockPrefab;
     public GameObject blockContainerObject;
-
+    [Space]
+    [Header("Projectile")]
+    public GameObject bulletPrefab;
+    public GameObject bombPrefab;
+    public GameObject shooterObj;
+    [Space]
+    [Header("Grid Properties")]
     [Range(1, 5)]
     public int wallRowCount;
     [Range(1, 9)]
     public int wallColumnCount;
     [Range(1, 10)]
     public int randomRange;
+    [Range(1, 10)]
+    public int bombChance;
 
     internal List<GameObject> blockList;
 
-    Vector3 touchPosWorld;
-    TouchPhase touchPhase = TouchPhase.Ended;
+    internal int colorfulBlockCounter;
 
+    internal bool gameStarted;
 
-    private void Start()
-    {
-        InitializationFunction();
-    }
+    GameObject touchedObject;
 
-    private void Update()
-    {
-        TouchDetect();
-    }
+    
 
     public void InitializationFunction()
     {
         blockList = new List<GameObject>();
 
+        gameStarted = true;
+
         GeneratingBlocks();
     }
 
+    public void LevelCompletedSM()
+    {
+        gameStarted = false;
+
+        foreach (var item in blockList)
+        {
+            Destroy(item);
+        }
+    }
 
     private void GeneratingBlocks()
     {
         float tileSize = blockPrefab.transform.localScale.x + 0.1f;
+
+        blockContainerObject.transform.position = Vector3.zero;
+
+        colorfulBlockCounter = 0;
 
         for (int col = 0; col < wallColumnCount; col++)
         {
@@ -68,6 +87,8 @@ public class SceneManager : MonoBehaviour
             if(Random.Range(0, 10) >= 10 / randomRange)
             {
                 blockList[blockNum].GetComponent<BlockScript>().ChangeMaterial((BlockColor)Random.Range(0, 6));
+
+                colorfulBlockCounter++;
             }
         }
 
@@ -80,49 +101,59 @@ public class SceneManager : MonoBehaviour
         }
     }
 
-    public void TouchDetect()
+    public void ChangeBlocksColor()
     {
-//#if !UNITY_EDITOR
-//        if (Input.touchCount == 1 && Input.GetTouch(0).phase == touchPhase)
-//        {
-//            Ray ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
-
-//            RaycastHit hit;
-
-//            Debug.DrawRay(ray.origin, ray.direction * 100, Color.yellow, 100f);
-
-//            if (Physics.Raycast(ray, out hit))
-//            {
-//                Debug.Log(hit.transform.name);
-//                if (hit.collider != null)
-//                {
-//                    GameObject touchedObject = hit.transform.gameObject;
-
-//                    Debug.Log("Touched " + touchedObject.transform.name);
-//                }
-//            }
-//        }
-//#else
-        if (Input.GetMouseButtonDown(0))
+        foreach (var item in blockList)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            RaycastHit hit;
-
-            Debug.DrawRay(ray.origin, ray.direction * 100, Color.yellow, 100f);
-
-            if (Physics.Raycast(ray, out hit))
+            if(item.gameObject != null)
             {
-                Debug.Log(hit.transform.name);
-                if (hit.collider != null)
+                if (item.GetComponent<BlockScript>().hasColor)
                 {
-                    GameObject touchedObject = hit.transform.gameObject;
-
-                    Debug.Log("Touched " + touchedObject.GetComponent<BlockScript>().blockPlacementNumber);
+                    item.GetComponent<BlockScript>().ChangeMaterial((BlockColor)Random.Range(0, 6));
                 }
             }
         }
-        //#endif
+    }
+
+    public void ProjectileMotion()
+    {
+        if (gameStarted)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                RaycastHit hit;
+
+                if (Physics.Raycast(ray, out hit))
+                {
+                    if (hit.collider != null && hit.collider.gameObject.tag == "ColorBlock")
+                    {
+                        touchedObject = hit.transform.gameObject;
+
+                        Debug.Log("Touched " + touchedObject.GetComponent<BlockScript>().blockPlacementNumber);
+
+                        if ((int)Random.Range(0, 10) < bombChance)
+                        {
+                            InstatiateProjectileAndFire(bombPrefab, touchedObject.transform);
+                        }
+                        else
+                        {
+                            InstatiateProjectileAndFire(bulletPrefab, touchedObject.transform);
+                        }
+
+                        Debug.Log(colorfulBlockCounter);
+                    }
+                }
+
+                void InstatiateProjectileAndFire(GameObject prefab, Transform destination)
+                {
+                    GameObject bullet = Instantiate(prefab, shooterObj.transform.position, Quaternion.identity);
+
+                    bullet.GetComponent<Projectiles>().ProjectileFire(destination);
+                }
+            }
+        }
     }
 
 

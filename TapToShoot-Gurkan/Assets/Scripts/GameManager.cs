@@ -4,15 +4,30 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+
+    public SceneManager sceneManager;
+    public UIManager uIManager;
+
+
+    private void Start()
     {
-        
+        uIManager.OpeningUI();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
+        sceneManager.ProjectileMotion();
+
+        LevelCompleted();
     }
+
+    private void LevelCompleted()
+    {
+        if(sceneManager.colorfulBlockCounter == 0 && sceneManager.gameStarted)
+        {
+            sceneManager.LevelCompletedSM();
+            uIManager.LevelCompletedUI();
+        }
+    }
+
 }

@@ -4,14 +4,13 @@ using UnityEngine;
 
 public class BlockScript : MonoBehaviour
 {
+    [SerializeField]
+    Material[] mats;
 
     internal int blockPlacementNumber;
 
-    [SerializeField]
-    Material[] mats;
+    internal bool hasColor;
     
-
-
     public void BlockPos(Vector2 pos)
     {
         this.gameObject.transform.position = pos;
@@ -45,5 +44,24 @@ public class BlockScript : MonoBehaviour
             default:
                 break;
         }
+
+        hasColor = true;
+
+        this.transform.GetChild(0).gameObject.tag = "ColorBlock";
+    }
+
+    public void AddingForceAfterImpact()
+    {
+        hasColor = false;
+
+        this.GetComponent<Rigidbody>().isKinematic = false;
+
+        this.GetComponent<Rigidbody>().useGravity = true;
+
+        this.GetComponent<Rigidbody>().AddForce(new Vector3(Random.Range(-3, 3), Random.Range(-3, 3), Random.Range(3, 6)), ForceMode.Impulse);
+
+        FindObjectOfType<SceneManager>().colorfulBlockCounter--;
+
+        Destroy(this.gameObject, 2);
     }
 }
