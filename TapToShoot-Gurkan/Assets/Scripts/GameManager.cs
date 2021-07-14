@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviour
 
     private void LevelCompleted()
     {
-        if(sceneManager.colorfulBlockCounter == 0 && sceneManager.gameStarted)
+        if(sceneManager.colorfulBlockCounter <= 0 && sceneManager.gameStarted)
         {
             sceneManager.LevelCompletedSM();
             uIManager.LevelCompletedUI();

@@ -1038,8 +1038,8 @@ MonoBehaviour:
   bombPrefab: {fileID: 7836192229531668283, guid: 1a5349349702714449e59485611c4f6f,
     type: 3}
   shooterObj: {fileID: 963194225}
-  wallRowCount: 5
-  wallColumnCount: 9
+  wallRowCount: 4
+  wallColumnCount: 6
   randomRange: 3
   bombChance: 2
 --- !u!4 &1620345299
